@@ -134,19 +134,16 @@ public class HelloWorld {
 
         Observable.create(subscriber -> {
             throw new RuntimeException("failed!");
-        }).onErrorReturn(throwable -> {
-            return "fallback value";
-        }).subscribe(System.out::println);
+        }).onErrorReturn(throwable -> "fallback value")
+                .subscribe(System.out::println);
 
         Observable.create(subscriber -> {
             throw new RuntimeException("failed!");
-        }).retryWhen(attempts -> {
-            return attempts.zipWith(Observable.range(1, 3), (throwable, i) -> i)
+        }).retryWhen(attempts -> attempts.zipWith(Observable.range(1, 3), (throwable, i) -> i)
                     .flatMap(i -> {
                         System.out.println("delay retry by " + i + " second(s)");
                         return Observable.timer(i, TimeUnit.SECONDS);
-                    }).concatWith(Observable.error(new RuntimeException("Exceeded 3 retries")));
-        })
+                    }).concatWith(Observable.error(new RuntimeException("Exceeded 3 retries"))))
                 .subscribe(System.out::println, t -> t.printStackTrace());
 
         try {
